@@ -1,35 +1,14 @@
 const fs = require('fs').promises;
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+
 const filePath = path.join(__dirname, 'db/contacts.json');
 
-// const fileOperation = async (filePath, action = 'read', data = '') => {
-//   switch (action) {
-//     case 'read':
-//       const result = await fs.readFile(filePath, 'utf-8');
-//       break;
-//   }
-// };
-
-// fileOperation('db/contacts.json');
-// fs.readFile('db/contacts.json', 'utf-8')
-//   .then(data => {
-//     console.log(data);
-//   })
-//   .catch(err => console.log(err.message));
-
-/*
- * Розкоментуйте і запиши значення
- * const contactsPath = ;
- */
-
-// TODO: задокументувати кожну функцію
 const listContacts = async () => {
   const data = await fs.readFile(filePath);
   const contacts = JSON.parse(data);
-  //   console.log(contacts);
   return contacts;
 };
-listContacts();
 
 const getContactById = async contactId => {
   const contacts = await listContacts();
@@ -40,12 +19,36 @@ const getContactById = async contactId => {
   return contact;
 };
 
-function removeContact(contactId) {
-  // ...твій код
-}
+const removeContact = async contactId => {
+  const contacts = await listContacts();
+  const idx = contacts.findIdex(item => item.id === contactId);
+  if (idx === -1) {
+    return null;
+  }
+  const [removedContact] = contacts.splice(idx, 1);
+  await fs.writeFile(filePath, JSON.stringify(contacts));
+  return removedContact;
+};
 
 const addContact = async (name, email, phone) => {
-  await fs.appendFile('db/contacts.json', { name, email, phone });
+  const contacts = await listContacts();
+
+  const newContact = { name, email, phone, id: uuidv4() };
+  contacts.push(newContact);
+  await fs.writeFile(filePath, JSON.stringify(contacts));
+  return newContact;
+};
+
+const updateContact = async (contactId, name, email, phone) => {
+  const contacts = await listContacts();
+  const idx = contacts.findIdex(item => item.id === contactId);
+  if (idx === -1) {
+    return null;
+  }
+  const updatedContact = { contactId, name, email, phone };
+  contacts[idx] = updatedContact;
+  await fs.writeFile(filePath, JSON.stringify(contacts));
+  return updatedContact;
 };
 
 module.exports = {
@@ -53,4 +56,5 @@ module.exports = {
   getContactById,
   removeContact,
   addContact,
+  updateContact,
 };

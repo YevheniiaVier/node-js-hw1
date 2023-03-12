@@ -1,9 +1,9 @@
-const { Command } = require('commander');
+const { program } = require('commander');
 // const readline = require('readline');
 
 const contactsOperations = require('./contacts');
 
-const program = new Command();
+// const program = new Command();
 program
   .option('-a, --action <type>', 'choose action')
   .option('-i, --id <type>', 'user id')
@@ -29,11 +29,31 @@ const invokeAction = async ({ action, id, name, email, phone }) => {
       break;
 
     case 'add':
-      // ... name email phone
+      const newContact = await contactsOperations.addContact(
+        name,
+        email,
+        phone
+      );
+      return newContact;
       break;
 
     case 'remove':
-      // ... id
+      const removedContact = await contactsOperations.removeContact(id);
+      console.log(`Contact ${removedContact.name} is removed`);
+      return removedContact;
+      break;
+
+    case 'update':
+      const updatedContact = await contactsOperations.updateContact(
+        id,
+        name,
+        email,
+        phone
+      );
+      if (!updatedContact) {
+        throw new Error(`Contact with id: ${id} is not found`);
+      }
+      return updatedContact;
       break;
 
     default:
@@ -43,8 +63,6 @@ const invokeAction = async ({ action, id, name, email, phone }) => {
 
 // invokeAction(argv);
 
-// (async () => {
-//     await invokeAction(argv)
-// })();
-
-// process.argv.slice(2);
+(async () => {
+  await invokeAction(argv);
+})();
