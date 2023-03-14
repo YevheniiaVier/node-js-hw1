@@ -1,9 +1,7 @@
 const { program } = require('commander');
-// const readline = require('readline');
 
 const contactsOperations = require('./contacts');
 
-// const program = new Command();
 program
   .option('-a, --action <type>', 'choose action')
   .option('-i, --id <type>', 'user id')
@@ -19,6 +17,7 @@ const invokeAction = async ({ action, id, name, email, phone }) => {
   switch (action) {
     case 'list':
       const contacts = await contactsOperations.listContacts();
+      console.table(contacts);
       break;
 
     case 'get':
@@ -26,6 +25,7 @@ const invokeAction = async ({ action, id, name, email, phone }) => {
       if (!contact) {
         throw new Error(`Contact with id: ${id} is not found`);
       }
+      console.log(contact);
       break;
 
     case 'add':
@@ -34,13 +34,15 @@ const invokeAction = async ({ action, id, name, email, phone }) => {
         email,
         phone
       );
-      return newContact;
+      console.log(newContact);
+      console.table(await contactsOperations.listContacts());
       break;
 
     case 'remove':
       const removedContact = await contactsOperations.removeContact(id);
       console.log(`Contact ${removedContact.name} is removed`);
-      return removedContact;
+      console.log(removedContact);
+      console.table(await contactsOperations.listContacts());
       break;
 
     case 'update':
@@ -53,15 +55,13 @@ const invokeAction = async ({ action, id, name, email, phone }) => {
       if (!updatedContact) {
         throw new Error(`Contact with id: ${id} is not found`);
       }
-      return updatedContact;
+      console.log(updatedContact);
       break;
 
     default:
       console.warn('\x1B[31m Unknown action type!');
   }
 };
-
-// invokeAction(argv);
 
 (async () => {
   await invokeAction(argv);
